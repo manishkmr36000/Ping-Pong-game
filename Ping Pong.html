@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Ping Pong Game</title>
+    <style>
+        * {
+            padding: 0;
+            margin: 0;
+            box-sizing: border-box;
+        }
+
+        canvas {
+            display: block;
+            margin: 20px auto;
+            background-color: #f5f5f5;
+            border: 1px solid #ccc;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="pong" width="800" height="400"></canvas>
+
+    <script>
+        const canvas = document.getElementById("pong");
+        const context = canvas.getContext("2d");
+
+        // Create the Paddle
+        const paddleWidth = 10, paddleHeight = 100;
+        const player = { x: 0, y: canvas.height / 2 - paddleHeight / 2, width: paddleWidth, height: paddleHeight, color: "#70c5ce", dy: 8 };
+        const computer = { x: canvas.width - paddleWidth, y: canvas.height / 2 - paddleHeight / 2, width: paddleWidth, height: paddleHeight, color: "#70c5ce", dy: 4 };
+
+        // Create the Ball
+        const ball = { x: canvas.width / 2, y: canvas.height / 2, radius: 10, speed: 4, dx: 4, dy: 4, color: "#70c5ce" };
+
+        // Draw the Paddle
+        function drawPaddle(x, y, width, height, color) {
+            context.fillStyle = color;
+            context.fillRect(x, y, width, height);
+        }
+
+        // Draw the Ball
+        function drawBall(x, y, radius, color) {
+            context.fillStyle = color;
+            context.beginPath();
+            context.arc(x, y, radius, 0, Math.PI * 2, false);
+            context.closePath();
+            context.fill();
+        }
+
+        // Move the Paddle
+        function movePaddle(paddle, upKey, downKey) {
+            document.addEventListener("keydown", function (event) {
+                switch (event.keyCode) {
+                    case upKey:
+                        paddle.y -= paddle.dy;
+                        break;
+                    case downKey:
+                        paddle.y += paddle.dy;
+                        break;
+                }
+            });
+        }
+
+        // Update Game Objects
+        function update() {
+            movePaddle(player, 87, 83); // W and S keys
+            movePaddle(computer, 38, 40); // Up and Down arrow keys
+
+            // Update Ball Position
+            ball.x += ball.dx;
+            ball.y += ball.dy;
+
+            // Ball Collisions with Walls
+            if (ball.y + ball.radius > canvas.height || ball.y - ball.radius < 0) {
+                ball.dy *= -1;
+            }
+
+            // Ball Collisions with Paddles
+            if (ball.y + ball.radius > player.y && ball.y - ball.radius < player.y + player.height && ball.dx < 0) {
+                if (ball.x - ball.radius < player.x + player.width) {
+                    ball.dx *= -1;
+                }
+            }
+
+            if (ball.y + ball.radius > computer.y && ball.y - ball.radius < computer.y + computer.height && ball.dx > 0) {
+                if (ball.x + ball.radius > computer.x) {
+                    ball.dx *= -1;
+                }
+            }
+        }
+
+        // Render Game Objects
+        function render() {
+            // Clear the Canvas
+            context.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Draw the Paddles
+            drawPaddle(player.x, player.y, player.width, player.height, player.color);
+            drawPaddle(computer.x, computer.y, computer.width, computer.height, computer.color);
+
+            // Draw the Ball
+            drawBall(ball.x, ball.y, ball.radius, ball.color);
+        }
+
+        // Game Loop
+        function gameLoop() {
+            update();
+            render();
+        }
+
+        setInterval(gameLoop, 1000 / 60); // 60 frames per second
+    </script>
+</body>
+</html>
